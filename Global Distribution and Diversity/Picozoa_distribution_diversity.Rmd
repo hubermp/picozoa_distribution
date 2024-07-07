@@ -1,0 +1,739 @@
+---
+title: Global Distribution, Diversity, and Ecological Niche of Picozoa, a widespread
+  and enigmatic marine protist lineage
+output:
+  pdf_document: default
+  html_notebook: default
+---
+##############################################################################################################
+##### Script: Picozoa_distribution_diversity.R
+##### Created: 11/02/2024
+##### Author: Paula Huber
+##### Objective: to explore Picozoas distribution in EukBank Samples
+##### Modified: 21/10/2022
+##### NOTE: for data processioning please refer to the manuscript: Global Distribution, Diversity, and Ecological Niche of Picozoa, a widespread and enigmatic marine protist lineage
+##############################################################################################################
+
+
+#### 1.- Assessing Picozoa Abundance in the EukBank 18S rRDNA Amplicon Dataset
+```{r}
+# Libraries
+library(treemap)
+library(treemapify)
+library(grid)
+
+# 1.1.- Upload taxonomic table from EukBank database 
+# This table contains the relative contribution of high-rank Protistan groups to the total number of reads  in the EukBank dataset computed using EukRibo reference database.
+
+data<- read.table("EukRibo_taxonomic_EukBank_db.csv", sep = ",", header = T, dec=".")
+summary(data)
+#1.2.- tree map plot
+
+pdf("Supplementary Figure S1.pdf")
+tm<- treemap(data,
+        index="supergroup.level",
+        vSize="V4_reads_counts",
+        type="index"
+        ) 
+
+pdf("treemap_plot.pdf", width = 7, height = 7)
+grid.newpage()
+grid.draw(treemapify::ggplotify(tm)$grobs[[1]])
+dev.off()
+```
+
+
+#### 2.- Assessing Picozoa global distribution 
+##### 2.1.- Picozoa global distribution map
+```{r}
+# Libraries
+library(ggmap)
+library(ggplot2)
+library(raster)
+library(maptools)
+library(maps)
+
+#2.1.1.- Upload the metadata table
+#This table contains the samples contextual data from the EukBank dataset analysed in this work  (please referd Supplementary Table S1 in the manuscript)
+
+mtable <- read.table("metadata_associated_TableS1.csv", sep = ",", header = T)
+head(mtable)
+
+#2.1.2.- Plot abundance map
+map <- map_data("world")
+dplot <- ggplot(mtable, aes(x = longitude, y = latitude)) +
+           geom_polygon(data = map, aes(x = long, y = lat, group = group), fill = "white", color = "gray50") +
+           geom_point(aes(colour = envgroup, shape = picozoa_nreads > 0), alpha = 0.8, size = 2, stroke = 1) +
+           scale_color_manual(values = c("marine_water" = "#3b75a9",
+                                         "marine_ice" = "#81bcd6",
+                                         "marine_sediment" = "#00d5ff",
+                                         "marine_org" = "#1523eb",
+                                         "land_freshwater" = "#de8741",
+                                         "land_org" = "#a15800",
+                                         "land_water" = "#ffa65f",
+                                         "land_soil" = "#531100")) +
+           scale_shape_manual(values = c(18, 19)) + 
+           guides(shape = guide_legend(override.aes = list(size = 1))) +
+           theme(text = element_text(size = 10)) +
+           coord_fixed()
+
+print(dplot)
+
+#Save plot
+ggsave(plot = dplot, filename = "Figure 2", dpi = 300, height = 14, width = 20)
+
+```
+
+##### 2.2.-Relative contribution of Picozoa to Eukaryotic reads in samples with >5% Picozoa
+```{r}
+# Libraries
+library(ggplot2)
+library(dplyr)
+library(scatterpie)
+
+#2.2.1.- Upload the metadata table
+#This table contains the samples contextual data from the EukBank dataset analysed in this work  (please referd Supplementary Table S1 in the manuscript)
+
+mtable <- read.table("metadata_associated_TableS1.csv", sep = ",", header = T)
+head(mtable)
+
+#2.2.2.- Select variables and compute Picozoa relative abundance
+cdf <- mtable %>%
+  select(SampleID, latitude, longitude, picozoa_nreads, nreads) %>%
+  mutate(pProp = picozoa_nreads * 100 / nreads) %>%
+  filter(pProp > 5)
+
+#2.2.3.- Remove samples with the same location
+cdf <- cdf %>%
+  distinct(latitude, longitude, .keep_all = TRUE)
+
+
+#2.2.4.-Plot piechard map
+map <- borders("world", fill = "white", colour = "gray50")
+
+cplot<- ggplot() +
+       map +
+       theme_bw() +
+       xlab("Longitude (decimals)") +
+       ylab("Latitude (decimals)") +
+       theme(panel.border = element_blank(),
+             panel.grid.major = element_line(colour = "grey"),
+             panel.grid.minor = element_blank()) +
+       geom_scatterpie(aes(x = longitude, y = latitude), data = cdf, cols = c("picozoa_nreads", "nreads"), color = "black", alpha = 1, pie_scale = 1, width = 0.5, size = 1) +
+       scale_fill_manual(values = c("picozoa_nreads" = "#FFFF00", "nreads" = "white")) +
+       coord_equal() 
+  
+cplot
+
+#Save plot
+ggsave(plot = cplot, filename = "Supplementary Figure S3.pdf", dpi = 300, height = 14, width = 20)
+```
+
+##### 2.3.-Picozoa community composition, Abundance, Richness & Diversity in the sunlit and dark ocean
+
+```{r}
+#Libraries
+library(vegan)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(patchwork) # https://patchwork.data-imaginist.com/
+library(reshape2)
+library(RVAideMemoire)
+library(remotes)
+library(pairwiseAdonis)
+library(purrr)
+
+#2.3.1.- Upload files
+
+#abundance table
+#This table contains the number of reads (post-rarefaction) for each pOTU in EukBank pico-size marine samples, excluding time series and replicate data
+
+abtable<- read.table("abundance_table_marine_samples-rarefy.csv", sep = ",", header = T, dec = ".")
+otut=abtable
+rownames(otut)<-otut$SampleID
+otut$SampleID=NULL
+
+#metadata table
+#This table contains the samples contextual data from the EukBank dataset analysed in this work  (please referd Supplementary Table S1 in the manuscript)
+
+mtable <- read.table("metadata_associated_TableS1.csv", sep = ",", header = T, dec = ".")
+
+#2.3.2.- Test significant differences in community composition between the sunlit and dark ocean
+
+# Check negative and missing values
+if (sum(otut < 0) > 0) {
+  stop("The OTU matrix contains negative values")
+}
+if (any(is.na(otut))) {
+  stop("The OTU matrix contains missing values")
+}
+
+mvalues <- rowSums(otut) == 0
+otut <- otut[!mvalues, ]
+
+# Extract groups values 
+mtable <- mtable[mtable$SampleID %in% rownames(otut), ]
+groups<- mtable$sunlit_dark_ocean[!mvalues]
+
+#Run PERMANOVA analysis
+otum<- vegdist(otut, method = "bray")
+resut <- adonis2(otum ~ groups, data = mtable)
+print(result)
+
+
+#2.3.3.- Calculate total Abundance per samples, diversity and richness 
+
+#abundance
+abtable$pOTU_total_abundance <- rowSums(abtable[ ,2:180])
+ndf <- abtable[c("SampleID","pOTU_total_abundance")]
+
+#richness
+richness <- estimateR(otut) %>% t() %>% as.data.frame()
+richness$SampleID <- row.names(richness)
+
+#diversity
+Shannon <- diversity(otut, index = "shannon", MARGIN = 1, base = exp(1))
+Shannon <- Shannon %>% 
+  as.data.frame() %>% 
+  rename(Shannon = ".")
+Shannon$SampleID <- row.names(Shannon)
+
+#merge data
+merged <- reduce(list(mtable, Shannon, richness, ndf), merge, by = "SampleID")
+ttesdf <- merged[c("SampleID", "latitude", "sunlit_dark_ocean", "Ocean", "lat_rank", "pOTU_total_abundance", "S.chao1", "Shannon")]
+
+#select variables for next analysis (2.4)
+ttesdf <- merged[c("SampleID","latitude","sunlit_dark_ocean", "Ocean", "lat_rank","pOTU_total_abundance", "S.chao1", "Shannon")]
+
+#2.3.3.- Test significant differences in abundance, diversity and richness between the sunlit and dark ocean
+
+## T-tests
+# create factors
+ttesdf$sunlit_dark_ocean <- as.factor(ttesdf$sunlit_dark_ocean)
+abundance_ttest <- t.test(pOTU_total_abundance ~ sunlit_dark_ocean, data = ttesdf)
+richness_ttest <- t.test(S.chao1 ~ sunlit_dark_ocean, data = ttesdf)
+diversity_ttest <- t.test(Shannon ~ sunlit_dark_ocean, data = ttesdf)
+
+# Results
+abundance_ttest
+richness_ttest
+diversity_ttest
+
+#2.3.3.- Plot abundance, diversity and richness in the sunlit and dark ocean
+
+#normalize values
+ttesdf$normalizedAbundance <- (ttesdf$pOTU_total_abundance - min(ttesdf$pOTU_total_abundance)) / (max(ttesdf$pOTU_total_abundance) - min(ttesdf$pOTU_total_abundance))
+ttesdf$normalizedRichness <- (ttesdf$S.chao1 - min(ttesdf$S.chao1)) / (max(ttesdf$S.chao1) - min(ttesdf$S.chao1))
+ttesdf$normalizedDiversity <- (ttesdf$Shannon - min(ttesdf$Shannon)) / (max(ttesdf$Shannon) - min(ttesdf$Shannon))
+
+selected_columns <- ttesdf[c("sunlit_dark_ocean", "normalizedAbundance", "normalizedRichness", "normalizedDiversity")]
+melted_data <- reshape2::melt(selected_columns, id.vars = "sunlit_dark_ocean")
+order <- c("sunlit ", "dark_ocean")
+melted_data$sunlit_dark_ocean <- factor(melted_data$sunlit_dark_ocean, levels = order)
+
+#box plot
+box_plot <- ggplot(melted_data, aes(x =variable, y = value, fill = sunlit_dark_ocean)) +
+  geom_boxplot(position = position_dodge(width = 0.8)) +
+  labs(title = "Box Plot showing community features at different columns depht", y = "Normalize Valor") +
+  scale_fill_manual(values = c("sunlit " = "#a5cee3", "dark_ocean" = "#536772")) +
+  scale_color_manual(values = c("sunlit " = "#a5cee3", "dark_ocean" = "#536772")) 
+print(box_plot)
+
+#Save plot
+ggsave(plot = box_plot, filename = "Supplementary Figure S4.pdf", dpi = 300, height = 14, width = 20)
+```
+
+
+##### 2.4.- Picozoa abundance, Richness, Diversity & community composition in the sunlit ocean
+```{r}
+##2.4.1.- Select variables for sunlit
+sunlit <- ttesdf %>% filter(sunlit_dark_ocean == "sunlit ")
+
+##2.4.2.- Abundance, Richness, Diversity latitudinal distribution plots
+abundance <- ggplot(data = sunlit) +
+  geom_point(mapping = aes(x = latitude, y = normalizedAbundance)) +
+  geom_smooth(mapping = aes(x = latitude, y = normalizedAbundance), method = "loess", span = 0.7, color = 'green') +
+  scale_x_continuous(name = "Latitude", limits = c(-90, 90), breaks = c(-90, -60, -30, 0, 30, 60, 90)) +
+  theme(text = element_text(size = 10))+
+  coord_flip()
+abundance
+
+rich <- ggplot(data = sunlit)+
+  geom_point(mapping = aes(x = latitude, y = normalizedRichness))+
+  geom_smooth(mapping = aes(x = latitude, y = normalizedRichness), method="loess", span = 0.5, color = 'blue') +
+  scale_x_continuous(name = "Latitude", limits = c(-90, 90), breaks = c(-90,-60,-30,0,30,60,90))+
+  theme(text = element_text(size = 10))+
+   coord_flip()
+rich
+
+diversity <- ggplot(data = sunlit)+
+  geom_point(mapping = aes(x = latitude, y = normalizedDiversity))+
+  geom_smooth(mapping = aes(x = latitude, y = normalizedDiversity), method="loess",span = 0.8, color = 'red') +
+  scale_x_continuous(name = "Latitude",limits = c(-90, 90), breaks = c(-90,-60,-30,0,30,60,90))+ 
+  theme(text = element_text(size = 10))+
+  coord_flip()
+diversity
+
+patch <- abundance/rich/ diversity  +
+  plot_layout(nrow = 1, ncol = 3) 
+patch
+
+# Save plot
+ggsave(plot = patch, filename = "Figure 4b.pdf", dpi = 300, height = 14, width = 20)
+
+
+##2.4.3.- Community composition 
+##2.4.3a.- Upload files
+
+#abundance table
+#This table contains the number of reads (post-rarefaction) for each pOTU in EukBank pico-size marine samples, excluding time series and replicate data
+
+abtable<- read.table("abundance_table_marine_samples-rarefy.csv", sep = ",", header = T, dec = ".")
+otut=abtable
+
+#metadata table
+#This table contains the samples contextual data from the EukBank dataset analysed in this work  (please referd Supplementary Table S1 in the manuscript)
+
+mtable <- read.table("metadata_associated_TableS1.csv", sep = ",", header = T, dec = ".")
+
+#prepared the Sunlit pOTU table
+sunlit <- mtable %>% filter(sunlit_dark_ocean == "sunlit ")
+otutSunlit <- otut[otut$SampleID %in% sunlit$SampleID, ]
+sunlit <- sunlit[sunlit$SampleID %in% otutSunlit$SampleID, ]
+
+rownames(otutSunlit)<-otutSunlit$SampleID
+otutSunlit$SampleID=NULL
+
+##2.4.3b - NMDS analysis
+# Compute Bray-Curtis distance matrix
+mvalues <- rowSums(otutSunlit) == 0
+otutSunlit <- otutSunlit[!mvalues, ]
+
+# Compute NMDS analysis
+otut.mds <- metaMDS(comm = otutSunlit, distance ="bray") 
+otut.mds.variables <- as.data.frame(otut.mds$points)
+otut.mds.variables$SampleID <- rownames(otut.mds.variables)
+
+#remove outsamples
+remove <- c("SRR7033722", "SRR6471381","SRR6471400","SRR7036979","SRR6401001","ERR10234667","SRR6400991","SRR6401146","SRR6401127","SRR6401054","SRR6401045", "SRR7033481","ERR10234239","ERR10235154","SRR5915017", "ERR2220235", "SRR5917748", "ERR2220235","ERR2322055","ERR2322060","ERR2322134","ERR2338189","SRR5741931", "SRR7038589", "ERR2235903", "SRR7038437", "ERR10234502", "ERR2248396")
+otut.mds.variables <-  otut.mds.variables[!(row.names(otut.mds.variables) %in% remove), ]
+
+# prepared data to plot
+NMDS_xy <- inner_join(otut.mds.variables,sunlit, by = "SampleID")
+
+# plot NMDS
+nmds <- ggplot(NMDS_xy, aes(MDS1, MDS2)) + 
+        geom_point(aes(colour=Ocean, shape = lat_rank ),
+                    alpha = 1,  size = 2, stroke = 1) +
+    theme(text = element_text(size = 10)) +
+    scale_color_manual(values = c("AO" = "#5e4798",
+                                  "SO" = "#853375",
+                                  "IO" = "#c17169",
+                                  "MS" = "#7ec0e7",
+                                  "NAO" = "#5297a6",
+                                  "SAO" ="#52a676",
+                                  "NPO" = "#4484d8",
+                                  "SPO" = "#c1b369"))+
+    scale_shape_manual(values = c(15, 17, 16, 19,18,25)) 
+    #geom_text(label=MDS_xy$SampleID, nudge_x = 0, nudge_y = 0, size=1)
+
+ nmds
+
+# Save plot
+ggsave(plot = patch, filename = "Figure 4a.pdf", dpi = 300, height = 14, width = 20)
+
+# STRESS
+#Not an assumption of the process, but the most important factor to consider after generating an MDS plot is the ‘stress’. The stress provides a measure of the degree to which the distance between samples in reduced dimensional space (usually 2-dimensions) corresponds with the actual multivariate distance between the samples
+otut.mds$stress # Lower stress values indicate greater conformity and therefore are desirable. High stress values indicate that there was no 2-dimensional arrangement of your points that reflect their similarities. A rule of thumb is that stress values should ideally be less than 0.2 or even 0.1.
+
+##2.4.3c - Test significant differences in community composition amonglatitudes ranks
+
+#PERMANOVA Latitudinal Rank
+# Check negative and missing values
+if (sum(otutSunlit < 0) > 0) {
+  stop("The OTU matrix contains negative values")
+}
+
+if (any(is.na(otutSunlit))) {
+  stop("The OTU matrix contains missing values")
+}
+
+# Remove rows with all zero values
+mvalues <- rowSums(otutSunlit) == 0
+otutSunlit <- otutSunlit[!mvalues, ]
+
+# Extract groups values 
+sunlit <- sunlit[sunlit$SampleID %in% rownames(otutSunlit), ]
+groups<- sunlit$lat_rank[sunlit$SampleID %in% rownames(otutSunlit)]
+
+#Run PERMANOVA analysis
+otud<- vegdist(otutSunlit, method = "bray")
+result <- adonis2(otutSunlit ~ groups, data = sunlit)
+print(result)
+
+# pairwise_permanova
+pairwise_permanova <- function(otutSunlit, groups, method = "bray") {
+  unique_groups <- unique(groups)
+  p_vals <- matrix(NA, nrow = length(unique_groups), ncol = length(unique_groups))
+  rownames(p_vals) <- unique_groups
+  colnames(p_vals) <- unique_groups
+  
+  for (i in 1:(length(unique_groups) - 1)) {
+    for (j in (i + 1):length(unique_groups)) {
+      group1 <- unique_groups[i]
+      group2 <- unique_groups[j]
+      
+      subset_data <- otutSunlit[groups %in% c(group1, group2), ]
+      subset_groups <- groups[groups %in% c(group1, group2)]
+      
+      dissim <- vegdist(subset_data, method = method)
+      adonis_res <- adonis2(dissim ~ subset_groups)
+      
+      p_val <- adonis_res$`Pr(>F)`[1]
+      print(paste("Comparing", group1, "vs", group2, "p-value:", p_val))  # Mensaje de depuración
+      
+      p_vals[group1, group2] <- p_val
+      p_vals[group2, group1] <- p_val  # Para completar la matriz simétricamente
+    }
+  }
+  
+  p_vals_adj <- p.adjust(p_vals[!is.na(p_vals)], method = "bonferroni")
+  p_vals[!is.na(p_vals)] <- p_vals_adj
+  
+  return(p_vals)
+}
+
+pairwise_results <- pairwise_permanova(otutSunlit, groups)
+
+
+print(pairwise_results)
+
+```
+
+##### 2.5.- pOTUs latitudinal distributions in the sunlit ocean
+#########°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+Sebas tal vez esta parte se pueda mejorar. 
+
+```{r}
+#Libraries
+library(ggplot2)
+library(tidyverse)
+library(tidyr)
+
+#2.5.1.- Upload files
+
+#abundance table
+#This table contains the number of reads (post-rarefaction) for each pOTU in EukBank pico-size marine samples, excluding time series and replicate data
+
+abtable<- read.table("abundance_table_marine_samples-rarefy.csv", sep = ",", header = T, dec = ".")
+otut=abtable
+rownames(otut)<-otut$SampleID
+otut$SampleID=NULL
+
+#metadata table
+#This table contains the samples contextual data from the EukBank dataset analysed in this work  (please referd Supplementary Table S1 in the manuscript)
+
+mtable <- read.table("metadata_associated_TableS1.csv", sep = ",", header = T, dec = ".")
+
+#prepared the Sunlit pOTU table
+sunlit <- mtable %>% filter(sunlit_dark_ocean == "sunlit ")
+otutSunlit <- otut[otut$SampleID %in% sunlit$SampleID, ]
+rownames(otutSunlit)<-otutSunlit$SampleID
+otutSunlit$SampleID=NULL
+
+otuttSunlit <- as.data.frame(t(otutSunlit))
+
+#2.5.2.-Compute abundance and occurrence
+
+#abundance
+otuttSunlit$OTU_total_abundance <- rowSums(otuttSunlit)
+
+#occurrence
+otuttSunlit <- otuttSunlit %>%
+  mutate(ocurrence = rowSums(otuttSunlit[ ,1:1543] > 0))
+
+otu_feastrue <- otuttSunlit[ ,1670:1671]
+head(otu_feastrue)
+
+otu_feastrue <- arrange(otu_feastrue, desc(OTU_total_abundance))
+otu_feastrue$order <- 1:179
+
+#relative abundance
+otu_feastrue <- otu_feastrue %>%
+  mutate(relative_abundance  = OTU_total_abundance*100 / sum(OTU_total_abundance))
+otu_feastrue$relative_abundance <- format(otu_feastrue$relative_abundance, scientific = FALSE)
+otu_feastrue <- otu_feastrue %>%
+  mutate(ocurre_rel  = ocurrence*100 / 1671)
+head(otu_feastrue)
+
+#2.5.3.-Compute the abundant pOTU table (abundance)
+#Select OTUs with ocurrence > 50 samples (aprox 0.05% of the samples)
+abundantpOTUs <- subset(otu_feastrue, ocurrence > 49)
+abundantpOTUs
+
+# abundance table 
+abundantpOTUs$otuID <- rownames(abundantpOTUs)
+otuttSunlit$otuID <- rownames(otuttSunlit)
+abOTUt<- otuttSunlit[otuttSunlit$otuID %in% abundantpOTUs$otuID, ]
+abOTUt <- abOTUt[ ,1:1669]
+
+##2.5.4.-latitudinal_distribution_plot
+abOTUt <- as.data.frame(t(abOTUt))
+abOTUt$SampleID <- rownames(abOTUt)
+sunlit <- sunlit[sunlit$SampleID %in% rownames(abOTUt), ]
+selected_columns <- sunlit[c("SampleID","latitude","lat_rank")]
+latgraf <- merge( abOTUt ,selected_columns, by="SampleID")
+latgraf
+
+#longFormatFile
+fac <-latgraf[, c("pOTU047", "pOTU059", "pOTU049", "pOTU054", "pOTU036", "pOTU022", "pOTU005", "pOTU004", "pOTU003", "pOTU002", "pOTU020", "pOTU051", "pOTU052", "pOTU030", "pOTU037", "pOTU040", "pOTU031", "pOTU015", "pOTU014", "pOTU012", "pOTU013", "pOTU006", "pOTU009", "pOTU007", "pOTU001", "pOTU043", "pOTU046", "pOTU045", "pOTU048", "pOTU041", "pOTU044", "pOTU042", "pOTU039", "pOTU032", "pOTU038", "pOTU034", "pOTU035", "pOTU033", "pOTU029", "pOTU025", "pOTU023", "pOTU026", "pOTU028", "pOTU027", "pOTU019", "pOTU021", "pOTU018", "pOTU024", "pOTU016", "pOTU017", "pOTU008", "pOTU011", "pOTU010", "latitude")]
+fac
+datal <- gather(fac, key = "pOTU", value = "abundance", -latitude)
+
+# Convert the pOTU column to a factor with custom levels
+datal$pOTU <- factor(datal$pOTU, levels = c("pOTU005", "pOTU004", "pOTU003", "pOTU002", "pOTU022","pOTU036",  "pOTU047", "pOTU059", "pOTU009", "pOTU007", "pOTU001", "pOTU012","pOTU020", "pOTU051", "pOTU054", "pOTU030","pOTU052","pOTU031","pOTU014", "pOTU037", "pOTU040",  "pOTU015",   "pOTU013", "pOTU006", "pOTU016", "pOTU017", "pOTU008", "pOTU011","pOTU033", "pOTU029", "pOTU025", "pOTU023", "pOTU026","pOTU027", "pOTU019", "pOTU021", "pOTU018", "pOTU024","pOTU043", "pOTU049", "pOTU046", "pOTU045", "pOTU048", "pOTU041", "pOTU044", "pOTU042", "pOTU039", "pOTU032", "pOTU038", "pOTU034", "pOTU035",  "pOTU028",   "pOTU010"))
+                              
+# Convert 0s to NA
+datal$abundance <- ifelse(datal$abundance == 0, NA, datal$abundance)
+
+# Take the logarithm of the abundance values
+datal$abundance <- log1p(datal$abundance)
+
+# Create a set of plots, one for each pOTU
+gp1 <- ggplot(datal, aes(x = abundance, y = latitude)) +
+  geom_point() +
+  facet_wrap(~ pOTU, scales = "fixed", labeller = labeller(pOTU = label_both)) +
+  labs(title = "pOTU distribution", x = "Abundance (log)", y = "Latitude") +
+  scale_y_continuous(name = "Latitude", breaks = c(-90, -60, -30, 0, 30, 60, 90))
+gp1
+
+# Save plot
+ggsave(plot = gp1, filename = "Supplementary Figure S6.tiff", dpi = 300, height = 14, width = 20)
+
+```
+
+
+##### 3.- Assessing phylogenetic communities structure of Picozoa 
+
+##### 3.1.- Phylogenetic community structure 
+```{r}
+#Libraries
+library(picante)
+library(ape)
+library(ggplot2)
+library(reshape2)
+library(stats)
+library(agricolae)
+library(dunn.test)
+
+#3.1.1.- Upload files
+
+#abundance table
+#This table presents the number of reads (post-rarefaction) for each pOTU in EukBank pico-size marine samples, excluding time series and replicate data. Additionally, it includes reference sequence IDs used to construct the phylogenetic tree, with an abundance of 0. This ensures that the abundance table and the phylogenetic tree have the same entries for the MNTD analysis
+
+otut <- read.table("phylo_abundance_table_marine_samples-rarefy.csv", sep = ",", header = T, dec = ".")
+rownames(otut)<-otut$SampleID
+otut$SampleID=NULL
+
+#metadata table
+#This table contains the samples contextual data from the EukBank dataset analysed in this work  (please referd Supplementary Table S1 in the manuscript)
+
+mtable <- read.table("metadata_associated_TableS1.csv", sep = ",", header = T, dec = ".")
+
+#phylogenetic tree
+#This file contains the Picozoa 18S rRDNA maximum likelihood tree  The tree was constructed using reference sequences and pOTUs considering 1 000 replicates.
+
+tree <-read.tree("RAxML_bipartitions.Picozoan.tree")
+
+
+#3.1.2.- Compute phylogenetic distance matrix
+treedm<-cophenetic(tree)
+
+#3.1.3.- Compute the mean nearest taxon distance (MNTD) index
+ses.mntd.result <- ses.mntd(otut, treedm, null.model = "independentswap",
+                            abundance.weighted = FALSE, runs = 999)
+
+#Remove NA values
+ses.mntd.result <- ses.mntd.result[!is.na(ses.mntd.result$mntd.obs.z), ]
+#Remove non-significant values
+ses.mntd.result_sig <- subset(ses.mntd.result, mntd.obs.p > 0.05)
+
+#3.1.4.- MNTD plot
+SampleID <- rownames(ses.mntd.result_sig)
+ses.mntd.result_sig$SampleID <- SampleID 
+merged <- merge(mtable,ses.mntd.result_sig, by ="SampleID" )
+head(merged)
+selected_columns <- merged[c("lat_rank", "mntd.obs")]
+melted_data <- reshape2::melt(selected_columns, id.vars = "lat_rank")
+melted_data$lat_rank <- factor(melted_data$lat_rank, levels = c("60-90N", "30-60N", "0-30N", "0-30S", "30-60S", "60-90S"))
+
+# plot
+box_plot <- ggplot(melted_data, aes(x = variable, y = value, fill = lat_rank)) +
+  geom_boxplot(position = position_dodge(width = 1)) +
+  labs(title = "Box Plot showing community features at different columns depth", y = "Value") +
+  theme(text = element_text(size = 25)) +
+  scale_fill_manual(values = c("60-90N" = "#5e4798",
+                               "60-90S" = "#853375",
+                               "0-30N" = "#c17169",
+                               "0-30S" = "#7ec0e7",
+                               "30-60S" = "#52a676",
+                               "30-60N" = "#c1b369"))
+print(box_plot)
+
+# Save plot
+ggsave(plot = gp1, filename = "Supplementary Figure S8.tiff", dpi = 300, height = 14, width = 20)
+
+#3.1.5 - Test significant differences in phylogenetic structure  among latitudes 
+kruskal_result <- kruskal.test(mntd.obs ~ lat_rank, data = merged)
+print(kruskal_result)
+dunn_posthoc <- dunn.test(merged$mntd.obs, merged$lat_rank, method = "bonferroni")
+print(dunn_posthoc)
+
+```
+
+##### 3.2.-determining the pOTU environmental optimal and compute mantel correlogram with filogenetic distance
+
+```{r}
+#Libraries
+library(vegan)
+library (picante)
+
+#3.2.1.- Upload files
+
+#abundance table
+#This table contains the number of reads (post-rarefaction) for each pOTU in EukBank pico-size marine samples, excluding time series and replicate data
+
+abtable<- read.table("abundance_table_marine_samples-rarefy.csv", sep = ",", header = T, dec = ".")
+
+# Environmental variables 
+#This table contains the environmental variable obtained from WOA
+
+env_data <- read.csv("environmetal_variables_WOA.csv", header = TRUE, dec = ".", sep = ",")
+
+abtable <- abtable[abtable$SampleID %in% env_data$SampleID, ]
+env_data <- env_data[env_data$SampleID %in% abtable$SampleID, ]
+
+#phylogenetic tree
+#This file contains the Picozoa 18S rRDNA maximum likelihood tree.The tree was constructed using reference sequences and pOTUs considering 1 000 replicates.
+
+tree <-read.tree("RAxML_bipartitions.Picozoan.tree")
+
+#3.2.2.- Computing the environmental optimal for each pOTU
+
+# Ensure SampleID is the row names
+rownames(env_data) <- env_data$SampleID
+env_data <- env_data[ , -which(colnames(env_data) == "SampleID")]
+
+rownames(abtable) <- abtable$SampleID
+abtable <- abtable[ , -which(colnames(abtable) == "SampleID")]
+
+#order dataframe
+env_data <- env_data[order(rownames(abtable)), ]
+abtable <- abtable[order(rownames(abtable)), ]
+
+# Convert all data to numeric to avoid errors
+env_data <- data.frame(lapply(env_data, as.numeric))
+abtable <- data.frame(lapply(abtable, as.numeric))
+
+# Transpose OTU data for easier computation
+abtable <- t(abtable)
+
+# Initialize the result dataframe
+tn <- data.frame(matrix(ncol = ncol(env_data), nrow = nrow(abtable)))
+
+# environmental optimal
+for (i in 1:nrow(abtable)) { # Iterate over OTUs
+  full <- matrix(0, nrow = nrow(env_data), ncol = ncol(env_data))
+  for (j in 1:ncol(abtable)) { # Iterate over samples
+    full <- full + env_data[j, ] * abtable[i, j] # Multiply the abundance of the OTU by all environmental variables in the sample
+  }
+  tn[i, ] <- colSums(full) / sum(abtable[i, ]) # Divide by the total abundance of the OTU
+}
+
+# Assign column names and row names to the result
+colnames(tn) <- colnames(env_data)
+rownames(tn) <- rownames(abtable)
+
+# Output the result. tn file has the environmental optimal for each OTU.
+print(tn)
+tn <- na.omit(tn)
+
+#3.2.3.-Compute the phylogenetic distance matrix
+treedm<-cophenetic(tree)
+
+#select pOTUs from tn 
+otusn <- rownames(tn)
+treedm <- treedm[otusn, otusn]
+PhyloDist <- as.matrix(treedm)
+
+#3.2.4.- Create Traits.distance matrix 
+select <- c("Conductivity", "chl_", "nitrate", "oxygen", "phosphate", "salinity", "temperature")
+tn <- tn[ , select]
+
+distance_traits <- dist(tn, method = "euclidean")
+distance_traits <- as.matrix(distance_traits)
+
+#3.2.5.- Run Mantel Correlogram analysis
+MantelCorr <- mantel.correlog(distance_traits, treedm, n.class=50,  XY=NULL,  break.pts=NULL, 
+                cutoff=FALSE, r.type="pearson", nperm=999, mult="bonferroni", progressive=FALSE)
+
+#plot
+plot(MantelCorr, alpha=0.01,)
+#save plot
+ggsave(plot = MantelCorrp, filename = "Supplementary Figure S9a.tiff", dpi = 300, height = 14, width = 20)
+
+```
+
+##### 3.3.- Exploring the relationship between Phylogenetic Distance & Niche Overlap
+
+```{R}
+
+#Libraries
+library(picante)
+library(vegan)
+library(ggplot2)
+
+#3.3.1.- Upload files
+#This table contains the phylogenetic distance and niche overlap value between each abundant pOTU
+
+df <- read.table("PhyloDist_NichOverlap.csv", sep = ",", header = TRUE, dec = ".")
+
+#load data
+df$Phylodis_norm <- scale(df$Phylodist, center = FALSE, scale = max(df$Phylodist))
+df$NicheOver_norm <- scale(df$Niche0ver, center = FALSE, scale = max(df$Niche0ver))
+
+#3.3.2.- Fit a linear model
+lm <- lm(Phylodis_norm ~ NicheOver_norm, data = df)
+
+#3.3.3.- Get the p-value from the linear model
+pValue  <- summary(lm)$coefficients[2,4]
+cValue  <- cor.test(df$Phylodis_norm, df$NicheOver_norm, method = "pearson")$estimate
+
+#3.3.4.- plot
+# Define the colors for each CladeID
+clade_colors <- c(
+  "NN" = "grey",
+  "PIC01a" = "#FB7979",
+  "PIC01b" = "#FFA056",
+  "PIC01c" = "#A1ED81",
+  "PIC02" = "#8A57FF",
+  "PIC03" = "#716103",
+  "PIC05" = "#00D8D8"
+)
+
+# Plot the data
+p <- ggplot(df, aes(x = Phylodis_norm, y = NicheOver_norm, fill = CladeID)) +
+  geom_point(shape = 21, size = 2) +
+  labs(x = "Phylogenetic Distance (normalized)", y = "Niche Overlap") +
+  ggtitle(paste("Phylogenetic Distance & Niche Overlap",
+                "Correlation:", round(cValue, 2),
+                "p-value:", format(pValue, scientific = TRUE, digits = 2))) +
+  scale_fill_manual(values = clade_colors) # Apply the defined colors
+p
+
+#save plot
+ggsave(plot = MantelCorrp, filename = "Supplementary Figure S9b.tiff", dpi = 300, height = 14, width = 20)
+
+```
+
