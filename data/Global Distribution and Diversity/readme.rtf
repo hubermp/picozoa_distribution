@@ -1,103 +1,29 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2709
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fswiss\fcharset0 Helvetica-Bold;\f2\froman\fcharset0 Times-Bold;
-\f3\froman\fcharset0 Times-Roman;\f4\fswiss\fcharset0 Arial-BoldMT;}
-{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
-{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
-{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}
-{\list\listtemplateid2\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}}{\leveltext\leveltemplateid101\'01\'00;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{circle\}}{\leveltext\leveltemplateid102\'01\uc0\u9702 ;}{\levelnumbers;}\fi-360\li1440\lin1440 }{\listname ;}\listid2}
-{\list\listtemplateid3\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat5\levelspace360\levelindent0{\*\levelmarker \{decimal\}}{\leveltext\leveltemplateid201\'01\'00;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{circle\}}{\leveltext\leveltemplateid202\'01\uc0\u9702 ;}{\levelnumbers;}\fi-360\li1440\lin1440 }{\listname ;}\listid3}}
-{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}{\listoverride\listid3\listoverridecount0\ls3}}
-\paperw11900\paperh16840\margl1440\margr1440\vieww28300\viewh15040\viewkind0
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\tx18712\ri-9759\pardirnatural\partightenfactor0
+_______________________________________________________________
 
-\f0\fs24 \cf0 _______________________________________________________________
-\f1\b\fs28 \
-\
-\pard\pardeftab720\sa321\partightenfactor0
+Global Distribution, Diversity, and Ecological Niche of Picozoa, a Widespread and Enigmatic Marine Protist Lineage
+This repository contains the data files used to explore the distribution and diversity of Picozoa in the EukBank database. The data is organized into several files, each serving a specific purpose in the analysis of the global distribution, diversity, and ecological niche of Picozoa.
+Main R Script
+	•	Picozoa_distribution_and_diversity.Rmd
 
-\f2\fs36 \cf0 \expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 Global Distribution, Diversity, and Ecological Niche of Picozoa, a Widespread and Enigmatic Marine Protist Lineage\
-\pard\pardeftab720\sa240\partightenfactor0
+_______________________________________________________________
 
-\f3\b0\fs24 \cf0 This repository contains the data files used to explore the distribution and diversity of Picozoa in the EukBank database. The data is organized into several files, each serving a specific purpose in the analysis of the global distribution, diversity, and ecological niche of Picozoa.\
+Data Description
+Data Used to Study the Global Distribution and Diversity of Picozoa
+1.- EukRibo_taxonomic_EukBank_db.csv
+This table contains the relative contribution of high-rank protistan groups to the total number of reads in the EukBank dataset, computed using the EukRibo reference database.
+2.- metadata_associated_TableS1.csv
+his table contains the contextual data of the samples from the EukBank dataset analyzed in this work. Please refer to Supplementary Table S1 in the manuscript.
+3.- abundance_table_marine_samples-rarefy.csv
+This table contains the number of reads (post-rarefaction) for each pOTU in EukBank pico-size marine samples, excluding time series and replicate data.
 
-\f2\b\fs28 Main R Script\
-\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
-\ls1\ilvl0
-\fs24 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 Picozoa_distribution_and_diversity.Rmd
-\f1\fs28 \cf2 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 \
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\tx18712\ri-9759\pardirnatural\partightenfactor0
-\cf2 \
+Data Used to Study the Phylogenetic Community Structure and Phylogenetic Niche Conservatism of Picozoa
+4.- phylo_abundance_table_marine_samples-rarefy.csv
+This table contains the number of reads (post-rarefaction) for each pOTU in EukBank pico-size marine samples, excluding time series and replicate data, along with reference sequence IDs used to construct the phylogenetic tree, with an abundance of 0 used for MNTD analysis.
+5.- environmetal_variables_WOA.csv
+This table contains the environmental variables obtained from WOA, used for determining the pOTU environmental optima.
+6.- RAxML_bipartitions.Picozoan.tree
+ This file contains the Picozoa 18S rDNA maximum likelihood tree. The tree was constructed using reference sequences and pOTUs, considering 1,000 replicates. 
+7.- PhyloDist_NichOverlap.csv
+ This table contains the phylogenetic distance and niche overlap (Schoener’s D metric) values between each abundant pOTU.
 
-\f0\b0\fs24 \cf0 _______________________________________________________________
-\f1\b\fs28 \cf2 \
 
-\f0\b0\fs24 \cf0 \
-\pard\pardeftab720\sa298\partightenfactor0
-
-\f2\b\fs36 \cf0 \expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 Data Description\
-\pard\pardeftab720\sl288\slmult1\partightenfactor0
-
-\fs28 \cf0 \strokec2 Data Used to Study the Global Distribution and Diversity of Picozoa\
-\pard\tx220\tx720\pardeftab720\li720\fi-720\sl288\slmult1\partightenfactor0
-\ls2\ilvl0
-\fs24 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 1.- \expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 EukRibo_taxonomic_EukBank_db.csv
-\f3\b0 \
-\ls2\ilvl0
-\fs26 This table contains the relative contribution of high-rank protistan groups to the total number of reads in the EukBank dataset, computed using the EukRibo reference database.\
-\ls2\ilvl0
-\f2\b\fs24 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 2.- \expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 metadata_associated_TableS1.csv
-\f3\b0 \
-\pard\tx940\tx1440\pardeftab720\li1440\fi-1440\sl288\slmult1\partightenfactor0
-\ls2\ilvl1
-\fs26 \cf0 his table contains the contextual data of the samples from the EukBank dataset analyzed in this work. Please refer to Supplementary Table S1 in the manuscript.\
-\pard\tx220\tx720\pardeftab720\li720\fi-720\sl288\slmult1\partightenfactor0
-\ls2\ilvl0
-\f2\b\fs24 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 3.- \expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 abundance_table_marine_samples-rarefy.csv
-\f3\b0 \
-\pard\tx940\tx1440\pardeftab720\li1440\fi-1440\sl288\slmult1\partightenfactor0
-\ls2\ilvl1
-\fs26 \cf0 This table contains the number of reads (post-rarefaction) for each pOTU in EukBank pico-size marine samples, excluding time series and replicate data.\
-\pard\tx220\tx720\pardeftab720\li720\fi-720\sl288\slmult1\partightenfactor0
-\ls2\ilvl0
-\f2\b\fs24 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 \
-\pard\tx220\tx720\pardeftab720\li720\fi-720\sl288\slmult1\partightenfactor0
-\ls2\ilvl0
-\fs28 \cf0 \expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 Data Used to Study the Phylogenetic Community Structure and Phylogenetic Niche Conservatism of Picozoa\
-\pard\tx220\tx720\pardeftab720\li720\fi-720\sl288\slmult1\partightenfactor0
-\ls3\ilvl0
-\fs24 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 4.- \expnd0\expndtw0\kerning0
-phylo_abundance_table_marine_samples-rarefy.csv
-\f3\b0 \
-\pard\tx940\tx1440\pardeftab720\li1440\fi-1440\sl288\slmult1\partightenfactor0
-\ls3\ilvl1\cf0 This table contains the number of reads (post-rarefaction) for each pOTU in EukBank pico-size marine samples, excluding time series and replicate data, along with reference sequence IDs used to construct the phylogenetic tree, with an abundance of 0 used for MNTD analysis.\
-\ls3\ilvl1
-\f2\b \kerning1\expnd0\expndtw0 5.- \expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 environmetal_variables_WOA.csv
-\f3\b0 \
-\pard\tx220\tx720\pardeftab720\li720\fi-720\sl288\slmult1\partightenfactor0
-\ls3\ilvl0\cf0 This table contains the environmental variables obtained from WOA, used for determining the pOTU environmental optima.\
-\ls3\ilvl0
-\f2\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 6.- \expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 RAxML_bipartitions.Picozoan.tree
-\f3\b0 \
-\pard\tx940\tx1440\pardeftab720\li1440\fi-1440\sl288\slmult1\partightenfactor0
-\ls3\ilvl1\cf0  This file contains the Picozoa 18S rDNA maximum likelihood tree. The tree was constructed using reference sequences and pOTUs, considering 1,000 replicates. \
-\ls3\ilvl1
-\f2\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 7.- \expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 PhyloDist_NichOverlap.csv
-\f3\b0 \
-\pard\tx940\tx1440\pardeftab720\li1440\fi-1440\sl288\slmult1\partightenfactor0
-\ls3\ilvl1\cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0  \expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 This table contains the phylogenetic distance and niche overlap (Schoener\'92s D metric) values between each abundant pOTU.\
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\tx18712\pardeftab720\ri-9759\partightenfactor0
-
-\f4\b \cf2 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 \
-\
-}
