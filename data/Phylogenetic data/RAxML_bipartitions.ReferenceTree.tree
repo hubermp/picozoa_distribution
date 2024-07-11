@@ -1,0 +1,164 @@
+#NEXUS
+begin taxa;
+	dimensions ntax=62;
+	taxlabels
+	AF508277_Goniomonas_outgroup
+	AJ007285_Proteomonas_outgroup
+	AM901350_Hemiselmis_outgroup
+	AY426835_Picozoa_1803[&!color=#800080]
+	DQ060525_Picozoa_1781[&!color=#ff0000]
+	DQ060526_Picozoa_1789[&!color=#800080]
+	DQ222875_Picozoa_1801[&!color=#800080]
+	DQ222876_Picozoa_1799[&!color=#ff0000]
+	DQ222877_Picozoa_1801[&!color=#ff0000]
+	DQ222878_Picozoa_1801[&!color=#ff0000]
+	DQ222880_Picozoa_1800[&!color=#800080]
+	EU368037_Picozoa_1764[&!color=#00ff00]
+	EU368038_Picozoa_1717[&!color=#00ff00]
+	EU368039_Picozoa_1766[&!color=#ff0000]
+	GU068005_Katablepharids_outgroup
+	GU824414_Picozoa_1057[&!color=#0000ff]
+	HM126532_Rhodomonas_outgroup
+	HM581782_Picozoa_1789[&!color=#ff0000]
+	JF790986_Geminigera_outgroup
+	JF791041_Picozoa_1777[&!color=#ff0000]
+	JN934891_Picozoa_1667[&!color=#00ff00]
+	JN934892_Picozoa_1655[&!color=#800080]
+	JN934893_Picozoa_1656[&!color=#ff0000]
+	JQ222911_Picozoa_1637[&!color=#00ff00]
+	JQ226352_Picozoa_1606[&!color=#ff0000]
+	JQ226578_Picozoa_1601[&!color=#00ff00]
+	JQ956302_Picozoa_1583[&!color=#996633]
+	JX188383_Picozoa_1765[&!color=#ff8000]
+	JX840937_Picozoa_1271[&!color=#800080]
+	JX988758_Picozoa_1807[&!color=#ff0000]
+	KC488335_Picozoa_1658[&!color=#ff0000]
+	KC488337_Picozoa_1690[&!color=#00ff00]
+	KC488338_Picozoa_1714[&!color=#ff0000]
+	KC488340_Picozoa_1697[&!color=#996633]
+	KC488341_Picozoa_1706[&!color=#ff0000]
+	KC488343_Picozoa_1707[&!color=#800080]
+	KC488344_Picozoa_1680[&!color=#ff0000]
+	KC488345_Picozoa_1706[&!color=#00ff00]
+	KF031848_Picozoa_1765[&!color=#ff8000]
+	KF129812_Picozoa_1765[&!color=#ff0000]
+	KF130040_Picozoa_1763[&!color=#800080]
+	KF130187_Picozoa_1766[&!color=#00ff00]
+	KF130204_Picozoa_1765[&!color=#800080]
+	KF130491_Picozoa_1763[&!color=#800080]
+	KF130509_Picozoa_1765[&!color=#00ff00]
+	KF130560_Picozoa_1765[&!color=#ff0000]
+	KJ759275_Picozoa_1806[&!color=#00ff00]
+	KJ759641_Picozoa_1788[&!color=#00ffff]
+	KJ762470_Picozoa_1800[&!color=#996633]
+	KJ762479_Picozoa_1805[&!color=#ff0000]
+	KJ762836_Picozoa_1805[&!color=#ff0000]
+	KJ762967_Leucocryptos_Katablephafrids_outgroup
+	KJ762972_Picozoa_1807[&!color=#00ff00]
+	KJ763136_Picozoa_1804[&!color=#ff0000]
+	KJ763213_Picozoa_1806[&!color=#ff0000]
+	KJ763562_Picozoa_1796[&!color=#800080]
+	KJ763885_Picozoa_1800[&!color=#00ff00]
+	KJ925375_Katablepharids_outgroup
+	KJ925380_Katablepharids_outgroup
+	L28811_Cryptomonas_outgroup
+	U53126_Hanusia_outgroup
+	X57162_Guillardia_outgroup
+;
+end;
+
+begin trees;
+	tree tree_1 = [&R] (JX988758_Picozoa_1807:5.96E-4,((((((KJ762479_Picozoa_1805:1.0E-6,(HM581782_Picozoa_1789:0.002612,(DQ060525_Picozoa_1781:0.001959,EU368039_Picozoa_1766:0.003951)[&label=44]:1.0E-6)[&label=73]:1.0E-6)[&label=100]:0.004625,(JQ226352_Picozoa_1606:0.008353,((KF031848_Picozoa_1765:0.001315,JX188383_Picozoa_1765:0.001309)[&label=100]:0.007452,((((KF130187_Picozoa_1766:0.003298,KJ759275_Picozoa_1806:0.001952)[&label=100]:0.007241,(KJ762972_Picozoa_1807:0.007745,(KJ763885_Picozoa_1800:0.001299,KF130509_Picozoa_1765:0.001318)[&label=100]:0.004369)[&label=71]:0.002256)[&label=85]:0.008568,((EU368037_Picozoa_1764:0.002935,(JN934891_Picozoa_1667:1.0E-6,(EU368038_Picozoa_1717:0.003398,KC488337_Picozoa_1690:6.78E-4)[&label=56]:1.0E-6)[&label=93]:0.001057)[&label=99]:0.007365,(KC488345_Picozoa_1706:0.001798,(JQ226578_Picozoa_1601:8.09E-4,JQ222911_Picozoa_1637:0.007287)[&label=68]:1.0E-6)[&label=100]:0.013475)[&label=72]:0.003162)[&label=93]:0.006765,(((KC488340_Picozoa_1697:0.01196,(KJ762470_Picozoa_1800:1.0E-6,JQ956302_Picozoa_1583:8.09E-4)[&label=100]:0.009297)[&label=100]:0.047166,(GU824414_Picozoa_1057:0.191464,((((KJ925375_Katablepharids_outgroup:0.14495,(KJ925380_Katablepharids_outgroup:0.137607,KJ762967_Leucocryptos_Katablephafrids_outgroup:0.081483)[&label=57]:0.013505)[&label=68]:0.013169,GU068005_Katablepharids_outgroup:0.064985)[&label=91]:0.031453,(JF790986_Geminigera_outgroup:0.064994,((((L28811_Cryptomonas_outgroup:0.111485,(X57162_Guillardia_outgroup:0.001079,U53126_Hanusia_outgroup:0.008106)[&label=100]:0.0447)[&label=57]:0.009946,AJ007285_Proteomonas_outgroup:0.027381)[&label=26]:0.003678,(AM901350_Hemiselmis_outgroup:0.029207,HM126532_Rhodomonas_outgroup:0.039361)[&label=27]:0.005452)[&label=88]:0.022976,AF508277_Goniomonas_outgroup:0.136775)[&label=58]:0.030878)[&label=99]:0.050091)[&label=100]:0.080912,KJ759641_Picozoa_1788:0.102513)[&label=92]:0.024333)[&label=90]:0.02388)[&label=70]:0.007571,(KJ763562_Picozoa_1796:0.024977,(((AY426835_Picozoa_1803:0.001942,(KF130040_Picozoa_1763:6.55E-4,KF130204_Picozoa_1765:0.003295)[&label=78]:1.0E-6)[&label=100]:0.012861,(KF130491_Picozoa_1763:0.008682,(DQ222880_Picozoa_1800:0.004636,(((DQ060526_Picozoa_1789:0.005258,JN934892_Picozoa_1655:1.0E-6)[&label=74]:1.0E-6,KC488343_Picozoa_1707:1.0E-6)[&label=97]:1.0E-6,DQ222875_Picozoa_1801:1.0E-6)[&label=96]:0.001229)[&label=96]:0.005603)[&label=91]:0.007718)[&label=86]:0.009299,JX840937_Picozoa_1271:0.048208)[&label=85]:0.010743)[&label=99]:0.039479)[&label=93]:0.011583)[&label=48]:0.002692)[&label=94]:0.007482)[&label=66]:8.24E-4)[&label=83]:0.002587,KC488335_Picozoa_1658:0.003422)[&label=41]:1.0E-6,JN934893_Picozoa_1656:1.0E-6)[&label=44]:1.0E-6,(KC488344_Picozoa_1680:6.74E-4,(KC488341_Picozoa_1706:6.64E-4,KC488338_Picozoa_1714:0.005325)[&label=32]:1.0E-6)[&label=51]:1.0E-6)[&label=94]:0.002085,((((KJ763213_Picozoa_1806:0.002586,KJ763136_Picozoa_1804:1.0E-6)[&label=68]:1.0E-6,KJ762836_Picozoa_1805:0.001289)[&label=89]:0.001295,(DQ222877_Picozoa_1801:0.00717,KF130560_Picozoa_1765:6.53E-4)[&label=65]:1.0E-6)[&label=100]:0.006801,(JF791041_Picozoa_1777:0.001393,(KF129812_Picozoa_1765:0.004633,DQ222876_Picozoa_1799:0.004373)[&label=86]:7.56E-4)[&label=100]:0.008526)[&label=71]:0.001216)[&label=100]:0.009847,DQ222878_Picozoa_1801:0.002642);
+end;
+
+begin figtree;
+	set appearance.backgroundColorAttribute="Default";
+	set appearance.backgroundColour=#ffffff;
+	set appearance.branchColorAttribute="User selection";
+	set appearance.branchColorGradient=false;
+	set appearance.branchLineWidth=1.0;
+	set appearance.branchMinLineWidth=0.0;
+	set appearance.branchWidthAttribute="Fixed";
+	set appearance.foregroundColour=#000000;
+	set appearance.hilightingGradient=false;
+	set appearance.selectionColour=#2d3680;
+	set branchLabels.colorAttribute="User selection";
+	set branchLabels.displayAttribute="Branch times";
+	set branchLabels.fontName="sansserif";
+	set branchLabels.fontSize=8;
+	set branchLabels.fontStyle=0;
+	set branchLabels.isShown=false;
+	set branchLabels.significantDigits=4;
+	set layout.expansion=0;
+	set layout.layoutType="RECTILINEAR";
+	set layout.zoom=0;
+	set legend.attribute="label";
+	set legend.fontSize=10.0;
+	set legend.isShown=false;
+	set legend.significantDigits=4;
+	set nodeBars.barWidth=4.0;
+	set nodeBars.displayAttribute=null;
+	set nodeBars.isShown=false;
+	set nodeLabels.colorAttribute="User selection";
+	set nodeLabels.displayAttribute="label";
+	set nodeLabels.fontName="sansserif";
+	set nodeLabels.fontSize=8;
+	set nodeLabels.fontStyle=0;
+	set nodeLabels.isShown=false;
+	set nodeLabels.significantDigits=4;
+	set nodeShapeExternal.colourAttribute="User selection";
+	set nodeShapeExternal.isShown=false;
+	set nodeShapeExternal.minSize=10.0;
+	set nodeShapeExternal.scaleType=Width;
+	set nodeShapeExternal.shapeType=Circle;
+	set nodeShapeExternal.size=4.0;
+	set nodeShapeExternal.sizeAttribute="Fixed";
+	set nodeShapeInternal.colourAttribute="User selection";
+	set nodeShapeInternal.isShown=false;
+	set nodeShapeInternal.minSize=10.0;
+	set nodeShapeInternal.scaleType=Width;
+	set nodeShapeInternal.shapeType=Circle;
+	set nodeShapeInternal.size=4.0;
+	set nodeShapeInternal.sizeAttribute="Fixed";
+	set polarLayout.alignTipLabels=false;
+	set polarLayout.angularRange=0;
+	set polarLayout.rootAngle=0;
+	set polarLayout.rootLength=100;
+	set polarLayout.showRoot=true;
+	set radialLayout.spread=0.0;
+	set rectilinearLayout.alignTipLabels=false;
+	set rectilinearLayout.curvature=0;
+	set rectilinearLayout.rootLength=100;
+	set scale.offsetAge=0.0;
+	set scale.rootAge=1.0;
+	set scale.scaleFactor=1.0;
+	set scale.scaleRoot=false;
+	set scaleAxis.automaticScale=true;
+	set scaleAxis.fontSize=8.0;
+	set scaleAxis.isShown=false;
+	set scaleAxis.lineWidth=1.0;
+	set scaleAxis.majorTicks=1.0;
+	set scaleAxis.minorTicks=0.5;
+	set scaleAxis.origin=0.0;
+	set scaleAxis.reverseAxis=false;
+	set scaleAxis.showGrid=true;
+	set scaleBar.automaticScale=true;
+	set scaleBar.fontSize=10.0;
+	set scaleBar.isShown=true;
+	set scaleBar.lineWidth=1.0;
+	set scaleBar.scaleRange=0.0;
+	set tipLabels.colorAttribute="User selection";
+	set tipLabels.displayAttribute="Names";
+	set tipLabels.fontName="sansserif";
+	set tipLabels.fontSize=8;
+	set tipLabels.fontStyle=0;
+	set tipLabels.isShown=true;
+	set tipLabels.significantDigits=4;
+	set trees.order=true;
+	set trees.orderType="increasing";
+	set trees.rooting=true;
+	set trees.rootingType="User Selection";
+	set trees.transform=false;
+	set trees.transformType="cladogram";
+end;
+

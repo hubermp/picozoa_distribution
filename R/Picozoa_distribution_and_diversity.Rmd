@@ -5,19 +5,22 @@ output:
   pdf_document: default
   html_notebook: default
 ---
-##############################################################################################################
-##### Script: Picozoa_distribution_diversity.R
-##### Created: 11/02/2024
-##### Author: Paula Huber
-##### Objective: to explore Picozoas distribution in EukBank Samples
-##### Modified: 21/10/2022
-##### NOTE: for data processioning please refer to the manuscript: Global Distribution, Diversity, and Ecological Niche of Picozoa, a widespread and enigmatic marine protist lineage
-##############################################################################################################
 
+############################################################################################################## 
+
+##### Script: Picozoa_distribution_and_diversity.R
+##### Created: 11/02/2024
+##### Authors: Paula Huber.
+##### Objective: to explore Picozoas distribution in EukBank Samples
+##### NOTE: for data processing please refer to the manuscript: Global Distribution, Diversity, and Ecological Niche of Picozoa, a widespread and enigmatic marine protist lineage. This script is designed such that each code chunk can be executed independently. T
+
+############################################################################################################## 
 
 #### 1.- Assessing Picozoa Abundance in the EukBank 18S rRDNA Amplicon Dataset
+
 ```{r}
 # Libraries
+library(tidyverse)
 library(treemap)
 library(treemapify)
 library(grid)
@@ -42,13 +45,14 @@ grid.draw(treemapify::ggplotify(tm)$grobs[[1]])
 dev.off()
 ```
 
+#### 2.- Assessing Picozoa global distribution
 
-#### 2.- Assessing Picozoa global distribution 
 ##### 2.1.- Picozoa global distribution map
+
 ```{r}
 # Libraries
 library(ggmap)
-library(ggplot2)
+library(tidyverse)
 library(raster)
 library(maptools)
 library(maps)
@@ -84,11 +88,11 @@ ggsave(plot = dplot, filename = "Figure 2", dpi = 300, height = 14, width = 20)
 
 ```
 
-##### 2.2.-Relative contribution of Picozoa to Eukaryotic reads in samples with >5% Picozoa
+##### 2.2.-Relative contribution of Picozoa to Eukaryotic reads in samples with \>5% Picozoa
+
 ```{r}
 # Libraries
-library(ggplot2)
-library(dplyr)
+library(tidyverse)
 library(scatterpie)
 
 #2.2.1.- Upload the metadata table
@@ -133,16 +137,14 @@ ggsave(plot = cplot, filename = "Supplementary Figure S3.pdf", dpi = 300, height
 
 ```{r}
 #Libraries
+library(tidyverse)
 library(vegan)
-library(dplyr)
-library(ggplot2)
-library(tidyr)
 library(patchwork) # https://patchwork.data-imaginist.com/
 library(reshape2)
 library(RVAideMemoire)
 library(remotes)
 library(pairwiseAdonis)
-library(purrr)
+
 
 #2.3.1.- Upload files
 
@@ -244,8 +246,8 @@ print(box_plot)
 ggsave(plot = box_plot, filename = "Supplementary Figure S4.pdf", dpi = 300, height = 14, width = 20)
 ```
 
-
 ##### 2.4.- Picozoa abundance, Richness, Diversity & community composition in the sunlit ocean
+
 ```{r}
 ##2.4.1.- Select variables for sunlit
 sunlit <- ttesdf %>% filter(sunlit_dark_ocean == "sunlit ")
@@ -412,93 +414,90 @@ print(pairwise_results)
 ```
 
 ##### 2.5.- pOTUs latitudinal distributions in the sunlit ocean
-#########°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-Sebas tal vez esta parte se pueda mejorar. 
 
 ```{r}
 #Libraries
-library(ggplot2)
 library(tidyverse)
-library(tidyr)
 
 #2.5.1.- Upload files
 
 #abundance table
 #This table contains the number of reads (post-rarefaction) for each pOTU in EukBank pico-size marine samples, excluding time series and replicate data
-
-abtable<- read.table("abundance_table_marine_samples-rarefy.csv", sep = ",", header = T, dec = ".")
-otut=abtable
-rownames(otut)<-otut$SampleID
-otut$SampleID=NULL
+otut <- read_csv("abundance_table_marine_samples-rarefy.csv")
 
 #metadata table
 #This table contains the samples contextual data from the EukBank dataset analysed in this work  (please referd Supplementary Table S1 in the manuscript)
-
-mtable <- read.table("metadata_associated_TableS1.csv", sep = ",", header = T, dec = ".")
+mtable <- read_csv("metadata_associated_TableS1.csv")
 
 #prepared the Sunlit pOTU table
-sunlit <- mtable %>% filter(sunlit_dark_ocean == "sunlit ")
-otutSunlit <- otut[otut$SampleID %in% sunlit$SampleID, ]
-rownames(otutSunlit)<-otutSunlit$SampleID
-otutSunlit$SampleID=NULL
+sunlit <- filter(mtable, sunlit_dark_ocean == "sunlit")
+otutSunlit <- filter(otut, SampleID %in% sunlit$SampleID) |>
+  pivot_longer(cols = -1) |>
+  pivot_wider(names_from = SampleID, values_from = value) |>
+  rename(OTU = name) 
 
-otuttSunlit <- as.data.frame(t(otutSunlit))
+
+
 
 #2.5.2.-Compute abundance and occurrence
 
-#abundance
-otuttSunlit$OTU_total_abundance <- rowSums(otuttSunlit)
+otuttSunlit <- otutSunlit |>
+  #occurrence
+  mutate(ocurrence = rowSums(otutSunlit[ ,2:ncol(otutSunlit)] > 0)) |>
+  #abundance
+  mutate(OTU_total_abundance = rowSums(otutSunlit[,2:(ncol(otutSunlit))]))
 
-#occurrence
-otuttSunlit <- otuttSunlit %>%
-  mutate(ocurrence = rowSums(otuttSunlit[ ,1:1543] > 0))
-
-otu_feastrue <- otuttSunlit[ ,1670:1671]
-head(otu_feastrue)
-
-otu_feastrue <- arrange(otu_feastrue, desc(OTU_total_abundance))
-otu_feastrue$order <- 1:179
-
-#relative abundance
-otu_feastrue <- otu_feastrue %>%
-  mutate(relative_abundance  = OTU_total_abundance*100 / sum(OTU_total_abundance))
-otu_feastrue$relative_abundance <- format(otu_feastrue$relative_abundance, scientific = FALSE)
-otu_feastrue <- otu_feastrue %>%
-  mutate(ocurre_rel  = ocurrence*100 / 1671)
-head(otu_feastrue)
+# extract information
+otu_feastrue <- select(otuttSunlit, OTU, ocurrence, OTU_total_abundance) |>
+  arrange(desc(OTU_total_abundance)) |>
+  # order by abundance
+  mutate(order = factor(1:nrow(otutSunlit), levels = 1:nrow(otutSunlit))) |>
+  # Relative abundance
+  mutate(relative_abundance  = OTU_total_abundance*100 / sum(OTU_total_abundance)) |>
+  mutate(relative_abundance = format(relative_abundance, scientific = FALSE)) |>
+  # Relative occurrence
+  mutate(ocurre_rel = ocurrence*100 / (ncol(otutSunlit) - 1))
 
 #2.5.3.-Compute the abundant pOTU table (abundance)
 #Select OTUs with ocurrence > 50 samples (aprox 0.05% of the samples)
 abundantpOTUs <- subset(otu_feastrue, ocurrence > 49)
-abundantpOTUs
 
 # abundance table 
-abundantpOTUs$otuID <- rownames(abundantpOTUs)
-otuttSunlit$otuID <- rownames(otuttSunlit)
-abOTUt<- otuttSunlit[otuttSunlit$otuID %in% abundantpOTUs$otuID, ]
-abOTUt <- abOTUt[ ,1:1669]
+abOTUt <- filter(otutSunlit, OTU %in% abundantpOTUs$OTU)
 
 ##2.5.4.-latitudinal_distribution_plot
-abOTUt <- as.data.frame(t(abOTUt))
-abOTUt$SampleID <- rownames(abOTUt)
-sunlit <- sunlit[sunlit$SampleID %in% rownames(abOTUt), ]
-selected_columns <- sunlit[c("SampleID","latitude","lat_rank")]
-latgraf <- merge( abOTUt ,selected_columns, by="SampleID")
-latgraf
 
-#longFormatFile
-fac <-latgraf[, c("pOTU047", "pOTU059", "pOTU049", "pOTU054", "pOTU036", "pOTU022", "pOTU005", "pOTU004", "pOTU003", "pOTU002", "pOTU020", "pOTU051", "pOTU052", "pOTU030", "pOTU037", "pOTU040", "pOTU031", "pOTU015", "pOTU014", "pOTU012", "pOTU013", "pOTU006", "pOTU009", "pOTU007", "pOTU001", "pOTU043", "pOTU046", "pOTU045", "pOTU048", "pOTU041", "pOTU044", "pOTU042", "pOTU039", "pOTU032", "pOTU038", "pOTU034", "pOTU035", "pOTU033", "pOTU029", "pOTU025", "pOTU023", "pOTU026", "pOTU028", "pOTU027", "pOTU019", "pOTU021", "pOTU018", "pOTU024", "pOTU016", "pOTU017", "pOTU008", "pOTU011", "pOTU010", "latitude")]
-fac
-datal <- gather(fac, key = "pOTU", value = "abundance", -latitude)
+latgraf <- abOTUt |>
+  pivot_longer(cols = -1) |>
+  pivot_wider(names_from = OTU, values_from = value) |>
+  rename(SampleID = name) |>
+  left_join(select(sunlit, SampleID, latitude))
+
+#longFormatFile todos los que arrancan con potu
+fac <- latgraf |>
+  select(!SampleID)
+colnames(fac)
+datal <- pivot_longer(fac, names_to = "pOTU", values_to = "abundance", -latitude)
+datal
 
 # Convert the pOTU column to a factor with custom levels
-datal$pOTU <- factor(datal$pOTU, levels = c("pOTU005", "pOTU004", "pOTU003", "pOTU002", "pOTU022","pOTU036",  "pOTU047", "pOTU059", "pOTU009", "pOTU007", "pOTU001", "pOTU012","pOTU020", "pOTU051", "pOTU054", "pOTU030","pOTU052","pOTU031","pOTU014", "pOTU037", "pOTU040",  "pOTU015",   "pOTU013", "pOTU006", "pOTU016", "pOTU017", "pOTU008", "pOTU011","pOTU033", "pOTU029", "pOTU025", "pOTU023", "pOTU026","pOTU027", "pOTU019", "pOTU021", "pOTU018", "pOTU024","pOTU043", "pOTU049", "pOTU046", "pOTU045", "pOTU048", "pOTU041", "pOTU044", "pOTU042", "pOTU039", "pOTU032", "pOTU038", "pOTU034", "pOTU035",  "pOTU028",   "pOTU010"))
+datal$pOTU <- factor(datal$pOTU, levels = c("pOTU005", "pOTU004", "pOTU003", "pOTU002", "pOTU022",
+                                            "pOTU036",  "pOTU047", "pOTU059", "pOTU009", "pOTU007", 
+                                            "pOTU001", "pOTU012","pOTU020", "pOTU051", "pOTU054", "pOTU030",
+                                            "pOTU052","pOTU031","pOTU014", "pOTU037", "pOTU040",  "pOTU015",   
+                                            "pOTU013", "pOTU006", "pOTU016", "pOTU017", "pOTU008", "pOTU011",
+                                            "pOTU033", "pOTU029", "pOTU025", "pOTU023", "pOTU026","pOTU027", 
+                                            "pOTU019", "pOTU021", "pOTU018", "pOTU024","pOTU043", "pOTU049", 
+                                            "pOTU046", "pOTU045", "pOTU048", "pOTU041", "pOTU044", "pOTU042", 
+                                            "pOTU039", "pOTU032", "pOTU038", "pOTU034", "pOTU035",  "pOTU028",   
+                                            "pOTU010"))
+
                               
 # Convert 0s to NA
-datal$abundance <- ifelse(datal$abundance == 0, NA, datal$abundance)
+datal$abundance <- if_else(datal$abundance == 0, NA, datal$abundance)
 
 # Take the logarithm of the abundance values
-datal$abundance <- log1p(datal$abundance)
+datal$abundance <- log(datal$abundance)
 
 # Create a set of plots, one for each pOTU
 gp1 <- ggplot(datal, aes(x = abundance, y = latitude)) +
@@ -513,15 +512,15 @@ ggsave(plot = gp1, filename = "Supplementary Figure S6.tiff", dpi = 300, height 
 
 ```
 
+##### 3.- Assessing phylogenetic communities structure of Picozoa
 
-##### 3.- Assessing phylogenetic communities structure of Picozoa 
+##### 3.1.- Phylogenetic community structure
 
-##### 3.1.- Phylogenetic community structure 
 ```{r}
 #Libraries
+library(tidyverse)
 library(picante)
 library(ape)
-library(ggplot2)
 library(reshape2)
 library(stats)
 library(agricolae)
@@ -687,12 +686,12 @@ ggsave(plot = MantelCorrp, filename = "Supplementary Figure S9a.tiff", dpi = 300
 
 ##### 3.3.- Exploring the relationship between Phylogenetic Distance & Niche Overlap
 
-```{R}
+```{r}
 
 #Libraries
 library(picante)
 library(vegan)
-library(ggplot2)
+library(tidyverse)
 
 #3.3.1.- Upload files
 #This table contains the phylogenetic distance and niche overlap value between each abundant pOTU
@@ -736,4 +735,3 @@ p
 ggsave(plot = MantelCorrp, filename = "Supplementary Figure S9b.tiff", dpi = 300, height = 14, width = 20)
 
 ```
-
