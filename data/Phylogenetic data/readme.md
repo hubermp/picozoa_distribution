@@ -2,7 +2,7 @@ _______________________________________________________________
 
 ### Global Distribution, Diversity, and Ecological Niche of Picozoa, a Widespread and Enigmatic Marine Protist Lineage
 
-#### This repository contains the data files used to study the phylogeny of Picozoa based on 18S rDNA sequence analysis
+ This repository contains the data files used to study the phylogeny of Picozoa based on 18S rDNA sequence analysis
 _______________________________________________________________
 
 ### Data Description
