@@ -26,6 +26,6 @@ This table contains the number of reads (post-rarefaction) for each pOTU in EukB
 5. environmetal_variables_WOA.csv  
 This table contains the environmental variables obtained from WOA, used for determining the pOTU environmental optima.
 6. RAxML_bipartitions.Picozoan.tree  
-This file contains the Picozoa 18S rDNA maximum likelihood tree. The tree was constructed using reference sequences and pOTUs, considering 1 000 replicates. 
+This file contains the Picozoa 18S rDNA maximum likelihood tree. The tree was constructed using reference sequences and pOTUs, considering 1,000 replicates. 
 7. PhyloDist_NichOverlap.csv
 This table contains the phylogenetic distance and niche overlap (Schoener’s D metric) values between each abundant pOTU.
