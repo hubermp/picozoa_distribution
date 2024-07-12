@@ -8,4 +8,3 @@ We analyze the EukBank amplicon database ( 18S rRNA gene V4) to:
 3. study the ecological niche dynamics at the OTU level.
 
 Overall, this work advances our understanding of uncharted protists' evolutionary dynamics and ecological strategies. 
-
