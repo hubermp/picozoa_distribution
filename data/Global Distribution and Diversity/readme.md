@@ -2,7 +2,7 @@ _______________________________________________________________
 
 ### Global Distribution, Diversity, and Ecological Niche of Picozoa, a Widespread and Enigmatic Marine Protist Lineage
 
-This repository contains the data files used to explore the distribution and diversity of Picozoa in the EukBank database. The data is organized into several files, each serving a specific purpose in the analysis of the global distribution, diversity, and ecological niche of Picozoa.
+This repository contains the data files used to explore the distribution and diversity of Picozoa in the EukBank database. The data is organized into several files, each serving a specific purpose in the analysis.
 
 #### Main R Script
 Picozoa_distribution_and_diversity.Rmd
