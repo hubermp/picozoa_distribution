@@ -14,9 +14,9 @@ _______________________________________________________________
 
 1. EukRibo_taxonomic_EukBank_db.csv  
 This table contains the relative contribution of high-rank protistan groups to the total number of reads in the EukBank dataset, computed using the EukRibo reference database.
-2. metadata_associated_TableS1.csv   
+2. metadata_associated_TableS1.csv  
 This table contains the contextual data of the samples from the EukBank dataset analyzed in this work. Please refer to Supplementary Table S1 in the manuscript.
-3. abundance_table_marine_samples-rarefy.csv   
+3. abundance_table_marine_samples-rarefy.csv  
 This table contains the number of reads (post-rarefaction) for each pOTU in EukBank pico-size marine samples, excluding time series and replicate data.
 
 ##### Data Used to Study the Phylogenetic Community Structure and Phylogenetic Niche Conservatism of Picozoa
@@ -27,5 +27,5 @@ This table contains the number of reads (post-rarefaction) for each pOTU in EukB
 This table contains the environmental variables obtained from WOA, used for determining the pOTU environmental optima.
 6. RAxML_bipartitions.Picozoan.tree  
 This file contains the Picozoa 18S rDNA maximum likelihood tree. The tree was constructed using reference sequences and pOTUs, considering 1 000 replicates. 
-7. PhyloDist_NichOverlap.csv  
+7. PhyloDist_NichOverlap.csv
 This table contains the phylogenetic distance and niche overlap (Schoener’s D metric) values between each abundant pOTU.
